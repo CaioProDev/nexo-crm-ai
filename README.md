@@ -1,71 +1,78 @@
 # Nexo CRM
 
-CRM inteligente desenvolvido como projeto de portfólio para demonstrar uma aplicação full-stack com persistência real, interface responsiva e análise comercial assistida por IA.
+## Apresentação do Nexo CRM
 
-O projeto não está publicado como serviço online. Ele foi projetado para execução local e apresentação por meio de código-fonte, documentação técnica e capturas reais da interface.
+CRM inteligente para gestão de oportunidades comerciais, desenvolvido como MVP de portfólio com Next.js, PostgreSQL e inteligência artificial.
 
-## O problema
+O projeto demonstra uma aplicação full-stack funcional: os leads são persistidos no Supabase, o dashboard é calculado a partir dos dados reais do banco, o funil atualiza as etapas das oportunidades e o Copiloto Comercial analisa o contexto disponível usando a OpenAI Responses API.
 
-Equipes comerciais pequenas frequentemente distribuem informações entre planilhas, anotações e ferramentas desconectadas. Isso dificulta enxergar o pipeline, priorizar oportunidades e decidir o próximo contato.
+> Este é um projeto demonstrativo executado localmente, não um produto comercial ou serviço publicado. Pessoas, empresas, contatos, valores e oportunidades apresentados nas imagens e no seed são fictícios.
 
-O Nexo CRM reúne essas tarefas em um MVP compacto: uma base central de leads, um funil visual, indicadores derivados dos dados persistidos e um copiloto que transforma o contexto disponível em recomendações estruturadas.
+## Problema que o MVP resolve
+
+Equipes comerciais pequenas frequentemente distribuem informações entre planilhas, anotações e ferramentas desconectadas. Isso dificulta visualizar o pipeline, priorizar oportunidades e definir o próximo contato.
+
+O Nexo CRM concentra esse fluxo em uma experiência única:
+
+- registra e organiza leads;
+- apresenta indicadores comerciais derivados do banco;
+- permite acompanhar oportunidades em um funil visual;
+- transforma os dados disponíveis em recomendações comerciais estruturadas.
+
+## Screenshots do sistema
+
+As imagens abaixo foram capturadas com a aplicação em execução, conectada ao Supabase e utilizando os cinco registros fictícios de [`supabase/seed.sql`](supabase/seed.sql).
+
+### Dashboard comercial
+
+![Dashboard do Nexo CRM com indicadores de pipeline, conversão, receita e prioridades](docs/screenshots/dashboard.png)
+
+Visão consolidada do pipeline, receita ganha, taxa de conversão e ações prioritárias calculadas a partir dos leads persistidos.
+
+### Gestão de leads
+
+![Lista de leads do Nexo CRM com etapas, valores, scores e próximas ações](docs/screenshots/leads.png)
+
+Tabela responsiva com busca, filtro por etapa, score, valor estimado, próxima ação e acesso às operações de edição e análise.
+
+### Funil de vendas
+
+![Kanban do Nexo CRM organizado nas etapas Novo, Qualificado, Proposta, Negociação e Ganho](docs/screenshots/kanban.png)
+
+Kanban em cinco etapas com movimentação persistida no PostgreSQL e visão do valor acumulado em cada estágio.
+
+### Copiloto Comercial com OpenAI
+
+<p align="center">
+  <img src="docs/screenshots/ai-copilot.png" width="420" alt="Copiloto Comercial do Nexo CRM exibindo uma análise estruturada de oportunidade" />
+</p>
+
+<p align="center"><em>Análise real gerada pela OpenAI a partir dos dados disponíveis no CRM, com riscos, recomendação, justificativa, mensagem sugerida e limitações explícitas.</em></p>
 
 ## Funcionalidades implementadas
 
-- Dashboard com pipeline aberto, leads ativos, conversão, receita ganha e prioridades comerciais.
-- CRUD completo de leads persistido no PostgreSQL.
+- Dashboard com pipeline aberto, leads ativos, conversão, receita ganha e foco comercial.
+- CRUD completo de leads persistido no Supabase/PostgreSQL.
 - Busca e filtro por etapa.
-- Funil Kanban com movimentação de oportunidades entre cinco etapas.
-- Copiloto Comercial com análise real via OpenAI.
-- Saída estruturada com resumo, riscos, ação recomendada, justificativa, mensagem sugerida e informações ausentes.
-- Estados de carregamento, erro e operações assíncronas.
-- Interface responsiva com navegação por teclado e suporte a movimento reduzido.
-- HTTP Basic Auth como barreira temporária para a demonstração privada local.
+- Funil Kanban com movimentação entre cinco estágios.
+- Copiloto Comercial com resposta estruturada e validada.
+- Cópia da mensagem comercial sugerida pela IA.
+- Estados de carregamento, erro e mutações assíncronas.
+- Interface responsiva, foco acessível e suporte a movimento reduzido.
+- HTTP Basic Auth protegendo páginas e APIs durante a demonstração local.
 
-## Tecnologias
+## Copiloto Comercial com IA
 
-| Camada | Tecnologias |
-| --- | --- |
-| Aplicação | Next.js 16, App Router, React 19 e TypeScript |
-| Interface | Tailwind CSS 4, Motion e Lucide React |
-| Dados | Supabase e PostgreSQL |
-| IA | OpenAI Responses API e Structured Outputs |
-| Contratos | Zod 4 |
-| Qualidade | ESLint, TypeScript e build de produção do Next.js |
+O frontend envia somente o UUID do lead para `POST /api/ai/analyze-lead`. No servidor, a aplicação:
 
-## Arquitetura
+1. revalida a autorização;
+2. valida o UUID com Zod;
+3. busca o registro atualizado no Supabase;
+4. reduz e limita os campos enviados ao modelo;
+5. chama a OpenAI Responses API;
+6. valida a resposta estruturada antes de exibi-la.
 
-```mermaid
-flowchart LR
-    B[Browser] --> P[Next.js Proxy<br/>HTTP Basic Auth]
-    P --> UI[App Router<br/>Dashboard, Leads e Kanban]
-    UI --> API[Route Handlers protegidos]
-    API --> DB[(Supabase / PostgreSQL)]
-    API --> AI[OpenAI Responses API]
-```
-
-O navegador nunca acessa o banco ou a OpenAI diretamente. O `CRMProvider` consome Route Handlers do Next.js, que repetem a verificação de autorização, validam os dados e executam integrações server-side.
-
-### Fluxo de dados
-
-1. O frontend solicita os leads em `/api/leads`.
-2. O Route Handler autorizado consulta o Supabase usando credenciais exclusivas do servidor.
-3. Criação, edição, exclusão e movimentação no Kanban passam pelos mesmos contratos Zod.
-4. Para uma análise, o navegador envia somente o UUID do lead.
-5. O servidor busca o registro atualizado, reduz e limita os campos e então chama a OpenAI.
-6. A resposta estruturada é validada antes de retornar à interface.
-
-## Supabase e PostgreSQL
-
-O schema em [`supabase/schema.sql`](supabase/schema.sql) cria a tabela `public.leads`, constraints de domínio, timestamps e o trigger de atualização. Row Level Security permanece habilitado e nenhuma política pública irrestrita é criada.
-
-O seed em [`supabase/seed.sql`](supabase/seed.sql) contém cinco registros inteiramente fictícios. Os e-mails usam o domínio reservado `.demo`, e a inserção evita duplicação por endereço de e-mail.
-
-Neste MVP, os Route Handlers usam a service role para acessar o banco. Essa chave ignora RLS e, portanto, deve permanecer exclusivamente no servidor, atrás da autorização da aplicação.
-
-## Copiloto Comercial
-
-A rota `POST /api/ai/analyze-lead` utiliza a OpenAI Responses API com Structured Outputs. O schema Zod exige os seguintes campos:
+O contrato exige os campos:
 
 - `summary`
 - `risks`
@@ -74,29 +81,73 @@ A rota `POST /api/ai/analyze-lead` utiliza a OpenAI Responses API com Structured
 - `suggested_message`
 - `missing_information`
 
-O modelo é definido por `OPENAI_MODEL`. A implementação utiliza `responses.parse()` com `zodTextFormat`, valida novamente o resultado e não apresenta respostas simuladas quando o serviço está indisponível.
+A implementação usa `responses.parse()` com `zodTextFormat`, timeout de 30 segundos, ausência de retries automáticos, limite de tokens de saída e `store: false`. E-mail e telefone não são enviados ao modelo, e os campos do lead são tratados como dados não confiáveis, nunca como instruções.
 
-Medidas adicionais incluem timeout de 30 segundos, ausência de retries automáticos, limite de tokens de saída, `store: false`, redução do contexto e instruções explícitas para tratar os campos do lead como dados não confiáveis. E-mail e telefone não são enviados ao modelo.
+Quando faltam informações, o copiloto explicita a limitação. Ele não inventa conversas, objeções, reuniões ou condições financeiras e não executa ações comerciais automaticamente.
 
-## Segurança e limitações
+## Tecnologias utilizadas
 
-- `.env.local` e todos os arquivos `.env*`, exceto `.env.example`, são ignorados pelo Git.
-- Chaves do Supabase e da OpenAI não usam prefixo `NEXT_PUBLIC_`.
-- Todas as APIs revalidam HTTP Basic Auth; não dependem apenas do proxy.
-- Mutações cross-site são rejeitadas.
+| Camada | Tecnologias |
+| --- | --- |
+| Aplicação | Next.js 16, App Router, React 19 e TypeScript |
+| Interface | Tailwind CSS 4, Motion e Lucide React |
+| Persistência | Supabase e PostgreSQL |
+| Inteligência artificial | OpenAI Responses API e Structured Outputs |
+| Validação | Zod 4 |
+| Qualidade | ESLint, TypeScript e build de produção do Next.js |
+
+## Arquitetura técnica
+
+```mermaid
+flowchart LR
+    Frontend[Frontend Next.js] --> Routes[API Routes / Route Handlers]
+    Routes --> Database[(Supabase / PostgreSQL)]
+
+    Analysis[API de análise de leads] --> OpenAI[OpenAI Responses API]
+    OpenAI --> Validation[Structured Outputs / Zod]
+    Validation --> Copilot[Interface do Copiloto]
+```
+
+O `CRMProvider` centraliza o estado da interface e consome exclusivamente os Route Handlers. O navegador não acessa diretamente o banco nem a OpenAI.
+
+### Estrutura principal
+
+```text
+app/
+├── api/ai/analyze-lead/   # análise server-side com OpenAI
+├── api/leads/             # CRUD server-side
+├── funil/                 # Kanban comercial
+├── leads/                 # gestão de leads e copiloto
+└── page.tsx               # dashboard
+components/                # shell, provider e componentes compartilhados
+lib/                       # contratos, repositório e integrações server-side
+supabase/                  # schema e seed demonstrativo
+docs/screenshots/          # evidências reais da interface
+```
+
+## Decisões de engenharia e segurança
+
+- O Supabase é a fonte principal dos dados; não existe fallback para `localStorage`.
+- A service role permanece exclusivamente no servidor e nunca utiliza prefixo `NEXT_PUBLIC_`.
+- Row Level Security está habilitado e nenhuma política pública irrestrita é criada.
+- O proxy protege toda a aplicação e cada Route Handler repete a autorização.
+- Mutações de origem cruzada são rejeitadas.
 - Entradas e saídas relevantes são validadas com Zod.
-- Logs de erro são sanitizados e não incluem credenciais ou dados do lead.
-- O copiloto apenas recomenda ações; ele não envia mensagens nem altera negócios automaticamente.
+- Erros retornados ao navegador e registrados no servidor são sanitizados.
+- `.env.local`, dependências, builds, logs e caches são ignorados pelo Git.
+- O seed evita duplicação por e-mail e utiliza o domínio reservado `.demo`.
 
-HTTP Basic Auth é uma proteção temporária para uma demonstração privada e deve ser usado sobre HTTPS fora de `localhost`. Antes de qualquer uso público ou multiusuário, o projeto precisa de autenticação individual, autorização por workspace e políticas RLS vinculadas ao usuário. Não reutilize credenciais reais em ambientes de demonstração.
+Neste MVP, os Route Handlers usam a service role para acessar o banco. Como essa credencial ignora RLS, ela permanece atrás da autorização server-side e nunca é enviada ao navegador.
 
-## Executar localmente
+## Como executar localmente
 
-Pré-requisitos:
+### Pré-requisitos
 
 - Node.js 20.9 ou superior; recomenda-se a versão LTS atual.
 - Projeto Supabase.
-- Chave da OpenAI para habilitar o copiloto.
+- Chave da OpenAI para habilitar o Copiloto Comercial.
+
+### Instalação
 
 ```bash
 npm install
@@ -104,20 +155,20 @@ cp .env.example .env.local
 npm run dev
 ```
 
-No Windows PowerShell, use:
+No Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env.local
 npm run dev
 ```
 
-Depois, acesse [http://localhost:3000](http://localhost:3000). O navegador solicitará as credenciais HTTP Basic configuradas.
+Acesse [http://localhost:3000](http://localhost:3000). O navegador solicitará as credenciais HTTP Basic configuradas.
 
 ### Banco de dados
 
 1. Crie um projeto no Supabase.
 2. Execute [`supabase/schema.sql`](supabase/schema.sql) no SQL Editor.
-3. Para carregar os cinco registros demonstrativos, execute [`supabase/seed.sql`](supabase/seed.sql).
+3. Execute [`supabase/seed.sql`](supabase/seed.sql) para inserir os cinco leads demonstrativos.
 4. Preencha o `.env.local` sem versioná-lo.
 
 ### Variáveis de ambiente
@@ -140,20 +191,7 @@ OPENAI_MODEL=gpt-5.6-luna
 | `OPENAI_API_KEY` | Credencial server-side para a Responses API |
 | `OPENAI_MODEL` | Modelo utilizado pelo copiloto |
 
-## Screenshots
-
-As evidências devem ser capturas reais do sistema conectado aos registros demonstrativos. Os arquivos ficam em [`docs/screenshots`](docs/screenshots):
-
-| Arquivo | Tela |
-| --- | --- |
-| `dashboard.png` | Indicadores e visão geral comercial |
-| `leads.png` | Tabela, busca e etapas dos leads |
-| `kanban.png` | Funil de vendas em cinco colunas |
-| `ai-copilot.png` | Painel do lead e Copiloto Comercial |
-
-Nenhuma imagem substituta é incluída. Consulte as instruções da pasta para reproduzir as capturas localmente sem expor credenciais.
-
-## Verificações
+### Verificações locais
 
 ```bash
 npm run lint
@@ -161,15 +199,13 @@ npm run typecheck
 npm run build
 ```
 
-## Melhorias futuras
+## Limitações do MVP
 
-- Substituir HTTP Basic Auth por Supabase Auth.
-- Adicionar isolamento por usuário e workspace com políticas RLS dedicadas.
-- Criar trilha de atividades e histórico de contatos.
-- Adicionar testes automatizados de componentes, rotas e fluxos críticos.
-- Implementar observabilidade com redaction de dados pessoais.
-- Adicionar paginação e filtros avançados para bases maiores.
+- HTTP Basic Auth é adequado apenas como barreira temporária para uma demonstração privada e deve ser usado sobre HTTPS fora de `localhost`.
+- Não existe autenticação individual, multi-tenancy ou isolamento por workspace.
+- O histórico de contatos ainda não é persistido; o copiloto trabalha somente com os campos atuais do lead.
+- Não há paginação ou filtros avançados para bases maiores.
+- Não existe envio automático de mensagens ou execução automática das recomendações.
+- A aplicação não possui deploy ou link de demonstração online.
 
-## Escopo do portfólio
-
-Este repositório representa um MVP demonstrativo. Pessoas, empresas, telefones, valores e oportunidades presentes no seed são fictícios e não representam operações comerciais reais.
+Antes de qualquer uso público ou multiusuário, o projeto precisa de autenticação individual, autorização por workspace e políticas RLS vinculadas ao usuário.
