@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #17251f;
+  --muted: #67736d;
+  --line: #dde4df;
+  --canvas: #f3f6f2;
+  --card: #fbfcfa;
+  --brand: #176b4b;
+  --brand-dark: #0c4b35;
+  --lime: #d7f06f;
+  --coral: #f07962;
+  --font-display: "Segoe UI Variable Display", "Segoe UI", sans-serif;
+  --font-body: "Segoe UI Variable Text", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--canvas); }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 82% 4%, rgba(215, 240, 111, .16), transparent 25rem),
+    var(--canvas);
+  font-family: var(--font-body), sans-serif;
+  font-feature-settings: "ss01";
+}
+
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+
+::selection { background: var(--lime); color: var(--brand-dark); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #cbd5cf; border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+
+.font-display { font-family: var(--font-display), sans-serif; }
+.card { background: color-mix(in srgb, var(--card) 94%, white); border: 1px solid var(--line); box-shadow: 0 1px 1px rgba(20, 40, 30, .02), 0 12px 40px rgba(31, 54, 42, .04); }
+.focus-ring:focus-visible { outline: 3px solid rgba(23, 107, 75, .2); outline-offset: 2px; }
+.noise { position: relative; }
+.noise::before { content: ""; position: absolute; inset: 0; opacity: .035; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E"); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
